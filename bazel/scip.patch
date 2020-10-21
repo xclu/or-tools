@@ -8,13 +8,26 @@
 +++ scip-7.0.1/src/symmetry/compute_symmetry_bliss.cpp	2020-07-03 10:15:20.016687707 +0200
 @@ -24,8 +24,8 @@
  #include "compute_symmetry.h"
- 
+
  /* include bliss graph */
 -#include <bliss/defs.hh>
 -#include <bliss/graph.hh>
 +#include <bliss-0.73/defs.hh>
 +#include <bliss-0.73/graph.hh>
- 
+
  #include <vector>
  #include <list>
 
+--- scip-7.0.1-orig/src/lpi/lpi_glop.cpp	2020-06-23 10:40:54.000000000 +0200
++++ scip-7.0.1/src/lpi/lpi_glop.cpp	2020-10-21 19:10:35.514260597 +0200
+@@ -41,7 +41,7 @@
+ #include "ortools/util/stats.h"
+ #include "ortools/util/time_limit.h"
+
+-#include "glog/logging.h"
+-#include "glog/vlog_is_on.h"
++#include "ortools/base/logging.h"
++#include "ortools/base/vlog_is_on.h"
+
+ #include "lpi/lpi.h"
+ #include "scip/pub_message.h"
