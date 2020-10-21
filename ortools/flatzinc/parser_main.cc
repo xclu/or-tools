@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
   absl::SetFlag(&FLAGS_log_prefix, false);
   absl::SetFlag(&FLAGS_logtostderr, true);
   absl::SetProgramUsageMessage(kUsage);
-  absl::ParseCommandLine(*argc, *argv);
+  absl::ParseCommandLine(argc, argv);
   google::InitGoogleLogging(argv[0]);
   operations_research::fz::ParseFile(absl::GetFlag(FLAGS_file),
                                      absl::GetFlag(FLAGS_presolve));
