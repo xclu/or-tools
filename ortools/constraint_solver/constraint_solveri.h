@@ -1004,28 +1004,28 @@ class IntVarLocalSearchHandler {
 /// In python, we use a whitelist to expose the API. This whitelist must also
 /// be extended here.
 #if defined(SWIGPYTHON)
-% unignore
+%unignore
         VarLocalSearchOperator<IntVar, int64, IntVarLocalSearchHandler>::Size;
-% unignore
+%unignore
         VarLocalSearchOperator<IntVar, int64, IntVarLocalSearchHandler>::Value;
-% unignore VarLocalSearchOperator<IntVar, int64,
+%unignore VarLocalSearchOperator<IntVar, int64,
                                   IntVarLocalSearchHandler>::OldValue;
-% unignore VarLocalSearchOperator<IntVar, int64,
+%unignore VarLocalSearchOperator<IntVar, int64,
                                   IntVarLocalSearchHandler>::SetValue;
-% feature("director") VarLocalSearchOperator<
+%feature("director") VarLocalSearchOperator<
       IntVar, int64, IntVarLocalSearchHandler>::IsIncremental;
-% feature("director")
+%feature("director")
     VarLocalSearchOperator<IntVar, int64, IntVarLocalSearchHandler>::OnStart;
-% unignore VarLocalSearchOperator<IntVar, int64,
+%unignore VarLocalSearchOperator<IntVar, int64,
                                   IntVarLocalSearchHandler>::IsIncremental;
-% unignore VarLocalSearchOperator<IntVar, int64,
+%unignore VarLocalSearchOperator<IntVar, int64,
                                   IntVarLocalSearchHandler>::OnStart;
 #endif  // SWIGPYTHON
 
 // clang-format off
-% rename(IntVarLocalSearchOperatorTemplate)
+%rename(IntVarLocalSearchOperatorTemplate)
     VarLocalSearchOperator<IntVar, int64, IntVarLocalSearchHandler>;
-% template(IntVarLocalSearchOperatorTemplate)
+%template(IntVarLocalSearchOperatorTemplate)
     VarLocalSearchOperator<IntVar, int64, IntVarLocalSearchHandler>;
 // clang-format on
 #endif  // SWIG
@@ -1148,9 +1148,9 @@ class SequenceVarLocalSearchHandler {
 // TODO(user): find a way to move this code back to the .i file, where it
 /// belongs.
 // clang-format off
-% rename(SequenceVarLocalSearchOperatorTemplate) VarLocalSearchOperator<
+%rename(SequenceVarLocalSearchOperatorTemplate) VarLocalSearchOperator<
       SequenceVar, std::vector<int>, SequenceVarLocalSearchHandler>;
-% template(SequenceVarLocalSearchOperatorTemplate) VarLocalSearchOperator<
+%template(SequenceVarLocalSearchOperatorTemplate) VarLocalSearchOperator<
       SequenceVar, std::vector<int>, SequenceVarLocalSearchHandler>;
 // clang-format on
 #endif
