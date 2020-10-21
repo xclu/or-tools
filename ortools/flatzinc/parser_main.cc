@@ -24,10 +24,10 @@
 #include "ortools/flatzinc/parser.h"
 #include "ortools/flatzinc/presolve.h"
 
-DEFINE_string(file, "", "Input file in the flatzinc format.");
-DEFINE_bool(print, false, "Print model.");
-DEFINE_bool(presolve, false, "Presolve loaded file.");
-DEFINE_bool(statistics, false, "Print model statistics");
+ABSL_FLAG(std::string, file, "", "Input file in the flatzinc format.");
+ABSL_FLAG(bool, print, false, "Print model.");
+ABSL_FLAG(bool, presolve, false, "Presolve loaded file.");
+ABSL_FLAG(bool, statistics, false, "Print model statistics");
 
 namespace operations_research {
 namespace fz {
@@ -67,8 +67,8 @@ void ParseFile(const std::string &filename, bool presolve) {
     FZLOG << model.DebugString() << FZENDL;
   }
 }
-} // namespace fz
-} // namespace operations_research
+}  // namespace fz
+}  // namespace operations_research
 
 int main(int argc, char **argv) {
   const char kUsage[] =

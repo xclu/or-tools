@@ -51,77 +51,77 @@
 #include "ortools/util/file_util.h"
 #include "ortools/util/time_limit.h"
 
-DEFINE_string(
-    input, "",
+ABSL_FLAG(
+    std::string, input, "",
     "Required: input file of the problem to solve. Many format are supported:"
     ".cnf (sat, max-sat, weighted max-sat), .opb (pseudo-boolean sat/optim) "
     "and by default the LinearBooleanProblem proto (binary or text).");
 
-DEFINE_string(
-    output, "",
+ABSL_FLAG(
+    std::string, output, "",
     "If non-empty, write the input problem as a LinearBooleanProblem proto to "
     "this file. By default it uses the binary format except if the file "
     "extension is '.txt'. If the problem is SAT, a satisfiable assignment is "
     "also written to the file.");
 
-DEFINE_bool(output_cnf_solution, false,
-            "If true and the problem was solved to optimality, this output "
-            "the solution to stdout in cnf form.\n");
+ABSL_FLAG(bool, output_cnf_solution, false,
+          "If true and the problem was solved to optimality, this output "
+          "the solution to stdout in cnf form.\n");
 
-DEFINE_string(params, "",
-              "Parameters for the sat solver in a text format of the "
-              "SatParameters proto, example: --params=use_conflicts:true.");
+ABSL_FLAG(std::string, params, "",
+          "Parameters for the sat solver in a text format of the "
+          "SatParameters proto, example: --params=use_conflicts:true.");
 
-DEFINE_bool(strict_validity, false,
-            "If true, stop if the given input is invalid (duplicate literals, "
-            "out of range, zero cofficients, etc.)");
+ABSL_FLAG(bool, strict_validity, false,
+          "If true, stop if the given input is invalid (duplicate literals, "
+          "out of range, zero cofficients, etc.)");
 
-DEFINE_string(
-    lower_bound, "",
+ABSL_FLAG(
+    std::string, lower_bound, "",
     "If not empty, look for a solution with an objective value >= this bound.");
 
-DEFINE_string(
-    upper_bound, "",
+ABSL_FLAG(
+    std::string, upper_bound, "",
     "If not empty, look for a solution with an objective value <= this bound.");
 
-DEFINE_bool(fu_malik, false,
-            "If true, search the optimal solution with the Fu & Malik algo.");
+ABSL_FLAG(bool, fu_malik, false,
+          "If true, search the optimal solution with the Fu & Malik algo.");
 
-DEFINE_bool(wpm1, false,
-            "If true, search the optimal solution with the WPM1 algo.");
+ABSL_FLAG(bool, wpm1, false,
+          "If true, search the optimal solution with the WPM1 algo.");
 
-DEFINE_bool(qmaxsat, false,
-            "If true, search the optimal solution with a linear scan and "
-            " the cardinality encoding used in qmaxsat.");
+ABSL_FLAG(bool, qmaxsat, false,
+          "If true, search the optimal solution with a linear scan and "
+          " the cardinality encoding used in qmaxsat.");
 
-DEFINE_bool(core_enc, false,
-            "If true, search the optimal solution with the core-based "
-            "cardinality encoding algo.");
+ABSL_FLAG(bool, core_enc, false,
+          "If true, search the optimal solution with the core-based "
+          "cardinality encoding algo.");
 
-DEFINE_bool(linear_scan, false,
-            "If true, search the optimal solution with the linear scan algo.");
+ABSL_FLAG(bool, linear_scan, false,
+          "If true, search the optimal solution with the linear scan algo.");
 
-DEFINE_int32(randomize, 500,
-             "If positive, solve that many times the problem with a random "
-             "decision heuristic before trying to optimize it.");
+ABSL_FLAG(int, randomize, 500,
+          "If positive, solve that many times the problem with a random "
+          "decision heuristic before trying to optimize it.");
 
-DEFINE_bool(use_symmetry, false,
-            "If true, find and exploit the eventual symmetries "
-            "of the problem.");
+ABSL_FLAG(bool, use_symmetry, false,
+          "If true, find and exploit the eventual symmetries "
+          "of the problem.");
 
-DEFINE_bool(presolve, true,
-            "Only work on pure SAT problem. If true, presolve the problem.");
+ABSL_FLAG(bool, presolve, true,
+          "Only work on pure SAT problem. If true, presolve the problem.");
 
-DEFINE_bool(probing, false, "If true, presolve the problem using probing.");
+ABSL_FLAG(bool, probing, false, "If true, presolve the problem using probing.");
 
-DEFINE_bool(use_cp_model, true,
-            "Whether to interpret everything as a CpModelProto or "
-            "to read by default a CpModelProto.");
+ABSL_FLAG(bool, use_cp_model, true,
+          "Whether to interpret everything as a CpModelProto or "
+          "to read by default a CpModelProto.");
 
-DEFINE_bool(reduce_memory_usage, false,
-            "If true, do not keep a copy of the original problem in memory."
-            "This reduce the memory usage, but disable the solution cheking at "
-            "the end.");
+ABSL_FLAG(bool, reduce_memory_usage, false,
+          "If true, do not keep a copy of the original problem in memory."
+          "This reduce the memory usage, but disable the solution cheking at "
+          "the end.");
 
 namespace operations_research {
 namespace sat {
@@ -133,8 +133,7 @@ double GetScaledTrivialBestBound(const LinearBooleanProblem &problem) {
   Coefficient best_bound(0);
   const LinearObjective &objective = problem.objective();
   for (const int64 value : objective.coefficients()) {
-    if (value < 0)
-      best_bound += Coefficient(value);
+    if (value < 0) best_bound += Coefficient(value);
   }
   return AddOffsetAndScaleObjectiveValue(problem, best_bound);
 }
@@ -181,8 +180,7 @@ std::string SolutionString(const LinearBooleanProblem &problem,
   std::string output;
   BooleanVariable limit(problem.original_num_variables());
   for (BooleanVariable index(0); index < limit; ++index) {
-    if (index > 0)
-      output += " ";
+    if (index > 0) output += " ";
     absl::StrAppend(&output,
                     Literal(index, assignment[index.value()]).SignedValue());
   }
@@ -224,7 +222,7 @@ int Run() {
   // TODO(user): clean this hack. Ideally LinearBooleanProblem should be
   // completely replaced by the more general CpModelProto.
   if (!cp_model.variables().empty()) {
-    problem.Clear(); // We no longer need it, release memory.
+    problem.Clear();  // We no longer need it, release memory.
     Model model;
     model.Add(NewSatParameters(parameters));
     const CpSolverResponse response = SolveCpModel(cp_model, &model);
@@ -241,10 +239,8 @@ int Run() {
 
     // The SAT competition requires a particular exit code and since we don't
     // really use it for any other purpose, we comply.
-    if (response.status() == CpSolverStatus::FEASIBLE)
-      return 10;
-    if (response.status() == CpSolverStatus::INFEASIBLE)
-      return 20;
+    if (response.status() == CpSolverStatus::FEASIBLE) return 10;
+    if (response.status() == CpSolverStatus::INFEASIBLE) return 20;
     return EXIT_SUCCESS;
   }
 
@@ -282,13 +278,11 @@ int Run() {
       LOG(INFO) << "UNSAT when loading the problem.";
     }
   }
-  auto strtoint64 = [](const std::string & word) {
+  auto strtoint64 = [](const std::string &word) {
     int64 value = 0;
-    if (!word.empty())
-      CHECK(absl::SimpleAtoi(word, &value));
+    if (!word.empty()) CHECK(absl::SimpleAtoi(word, &value));
     return value;
-  }
-  ;
+  };
   if (!AddObjectiveConstraint(
           problem, !absl::GetFlag(FLAGS_lower_bound).empty(),
           Coefficient(strtoint64(absl::GetFlag(FLAGS_lower_bound))),
@@ -325,9 +319,9 @@ int Run() {
     if (absl::GetFlag(FLAGS_randomize) > 0 &&
         (absl::GetFlag(FLAGS_linear_scan) || absl::GetFlag(FLAGS_qmaxsat))) {
       CHECK(!absl::GetFlag(FLAGS_reduce_memory_usage)) << "incompatible";
-      result = SolveWithRandomParameters(
-          STDOUT_LOG, problem, absl::GetFlag(FLAGS_randomize), solver.get(),
-          &solution);
+      result = SolveWithRandomParameters(STDOUT_LOG, problem,
+                                         absl::GetFlag(FLAGS_randomize),
+                                         solver.get(), &solution);
     }
     if (result == SatSolver::LIMIT_REACHED) {
       if (absl::GetFlag(FLAGS_qmaxsat)) {
@@ -434,16 +428,14 @@ int Run() {
 
   // The SAT competition requires a particular exit code and since we don't
   // really use it for any other purpose, we comply.
-  if (result == SatSolver::FEASIBLE)
-    return 10;
-  if (result == SatSolver::INFEASIBLE)
-    return 20;
+  if (result == SatSolver::FEASIBLE) return 10;
+  if (result == SatSolver::INFEASIBLE) return 20;
   return EXIT_SUCCESS;
 }
 
-} // namespace
-} // namespace sat
-} // namespace operations_research
+}  // namespace
+}  // namespace sat
+}  // namespace operations_research
 
 static const char kUsage[] =
     "Usage: see flags.\n"
@@ -455,7 +447,7 @@ int main(int argc, char **argv) {
   // the user to override it.
   //  absl::SetFlag(&FLAGS_vmodule, "*cp_model*=1");
   gflags::SetUsageMessage(kUsage);
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  absl::ParseCommandLine(argc, argv);
   google::InitGoogleLogging(argv[0]);
   absl::SetFlag(&FLAGS_alsologtostderr, true);
   return operations_research::sat::Run();

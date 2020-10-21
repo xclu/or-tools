@@ -31,39 +31,42 @@
 #include "ortools/lp_data/proto_utils.h"
 #include "ortools/util/file_util.h"
 
-DEFINE_string(input, "", "REQUIRED: Input file name.");
-DEFINE_string(solver, "glop",
-              "The solver to use: bop, cbc, clp, glop, glpk_lp, glpk_mip, "
-              "gurobi_lp, gurobi_mip, scip, knapsack.");
+ABSL_FLAG(std::string, input, "", "REQUIRED: Input file name.");
+ABSL_FLAG(std::string, solver, "glop",
+          "The solver to use: bop, cbc, clp, glop, glpk_lp, glpk_mip, "
+          "gurobi_lp, gurobi_mip, scip, knapsack.");
 
-DEFINE_int32(num_threads, 1,
-             "Number of threads to use by the underlying solver.");
-DEFINE_string(params_file, "",
-              "Solver specific parameters file. "
-              "If this flag is set, the --params flag is ignored.");
-DEFINE_string(params, "", "Solver specific parameters");
-DEFINE_int64(time_limit_ms, 0,
-             "If strictly positive, specifies a limit in ms on the solving "
-             "time. Otherwise, no time limit will be imposed.");
+ABSL_FLAG(int, num_threads, 1,
+          "Number of threads to use by the underlying solver.");
+ABSL_FLAG(std::string, params_file, "",
+          "Solver specific parameters file. "
+          "If this flag is set, the --params flag is ignored.");
+ABSL_FLAG(std::string, params, "", "Solver specific parameters");
+ABSL_FLAG(int64, time_limit_ms, 0,
+          "If strictly positive, specifies a limit in ms on the solving "
+          "time. Otherwise, no time limit will be imposed.");
 
-DEFINE_string(output_csv, "",
-              "If non-empty, write the returned solution in csv format with "
-              "each line formed by a variable name and its value.");
+ABSL_FLAG(std::string, output_csv, "",
+          "If non-empty, write the returned solution in csv format with "
+          "each line formed by a variable name and its value.");
 
-DEFINE_string(dump_format, "text",
-              "Format in which to dump protos (if flags --dump_model, "
-              "--dump_request, or --dump_response are used). Possible values: "
-              "'text', 'binary', 'json' which correspond to text proto format "
-              "binary proto format, and json. If 'binary' or 'json' are used, "
-              "we append '.bin' and '.json' to file names.");
+ABSL_FLAG(std::string, dump_format, "text",
+          "Format in which to dump protos (if flags --dump_model, "
+          "--dump_request, or --dump_response are used). Possible values: "
+          "'text', 'binary', 'json' which correspond to text proto format "
+          "binary proto format, and json. If 'binary' or 'json' are used, "
+          "we append '.bin' and '.json' to file names.");
 
-DEFINE_bool(dump_gzip, false,
-            "Whether to gzip dumped protos. Appends .gz to their name.");
-DEFINE_string(dump_model, "", "If non-empty, dumps MPModelProto there.");
-DEFINE_string(dump_request, "", "If non-empty, dumps MPModelRequest there.");
-DEFINE_string(dump_response, "", "If non-empty, dumps MPModelResponse there.");
+ABSL_FLAG(bool, dump_gzip, false,
+          "Whether to gzip dumped protos. Appends .gz to their name.");
+ABSL_FLAG(std::string, dump_model, "",
+          "If non-empty, dumps MPModelProto there.");
+ABSL_FLAG(std::string, dump_request, "",
+          "If non-empty, dumps MPModelRequest there.");
+ABSL_FLAG(std::string, dump_response, "",
+          "If non-empty, dumps MPModelResponse there.");
 
-DECLARE_bool(verify_solution); // Defined in ./linear_solver.cc
+ABSL_DECLARE_FLAG(bool, verify_solution);  // Defined in ./linear_solver.cc
 
 static const char kUsageStr[] =
     "Run MPSolver on the given input file. Many formats are supported: \n"
@@ -125,8 +128,8 @@ bool Run() {
   } else if (absl::GetFlag(FLAGS_dump_format) == "json") {
     write_format = ProtoWriteFormat::kJson;
   } else {
-    LOG(FATAL)
-        << "Unsupported --dump_format: " << absl::GetFlag(FLAGS_dump_format);
+    LOG(FATAL) << "Unsupported --dump_format: "
+               << absl::GetFlag(FLAGS_dump_format);
   }
 
   // Create the solver, we use the name of the model as the solver name.
@@ -148,13 +151,15 @@ bool Run() {
         << "Could not read parameters file.";
     CHECK(solver.SetSolverSpecificParametersAsString(file_contents));
   } else if (!absl::GetFlag(FLAGS_params).empty()) {
-    CHECK(solver.SetSolverSpecificParametersAsString(
-        absl::GetFlag(FLAGS_params))) << "Wrong --params format.";
+    CHECK(
+        solver.SetSolverSpecificParametersAsString(absl::GetFlag(FLAGS_params)))
+        << "Wrong --params format.";
   }
   absl::PrintF(
       "%-12s: %s\n", "Solver",
-      MPModelRequest::SolverType_Name(static_cast<MPModelRequest::SolverType>(
-          solver.ProblemType())).c_str());
+      MPModelRequest::SolverType_Name(
+          static_cast<MPModelRequest::SolverType>(solver.ProblemType()))
+          .c_str());
 
   // Load the proto into the solver.
   std::string error_message;
@@ -229,14 +234,15 @@ bool Run() {
   // a verification step here.
   if (has_solution && !absl::GetFlag(FLAGS_verify_solution)) {
     LOG(INFO) << "Verifying the solution";
-    solver.VerifySolution(/*tolerance=*/ param.GetDoubleParam(
+    solver.VerifySolution(/*tolerance=*/param.GetDoubleParam(
                               MPSolverParameters::PRIMAL_TOLERANCE),
-                          /*log_errors=*/ true);
+                          /*log_errors=*/true);
   }
 
   absl::PrintF("%-12s: %s\n", "Status",
                MPSolverResponseStatus_Name(
-                   static_cast<MPSolverResponseStatus>(solve_status)).c_str());
+                   static_cast<MPSolverResponseStatus>(solve_status))
+                   .c_str());
   absl::PrintF("%-12s: %15.15e\n", "Objective",
                has_solution ? solver.Objective().Value() : 0.0);
   absl::PrintF("%-12s: %15.15e\n", "BestBound",
@@ -250,12 +256,12 @@ bool Run() {
   return true;
 }
 
-} // namespace
-} // namespace operations_research
+}  // namespace
+}  // namespace operations_research
 
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
-  gflags::ParseCommandLineFlags(&argc, &argv, /*remove_flags=*/ true);
+  gflags::ParseCommandLineFlags(&argc, &argv, /*remove_flags=*/true);
   CHECK(!absl::GetFlag(FLAGS_input).empty()) << "--input is required";
   operations_research::Run();
 

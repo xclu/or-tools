@@ -31,27 +31,22 @@
 #include "ortools/base/random.h"
 #include "ortools/linear_solver/linear_solver.h"
 
-DEFINE_int32(verbose, 0, "Verbosity level.");
-DEFINE_int32(facilities, 20, "Candidate facilities to consider.");
-DEFINE_int32(clients, 100, "Clients to serve.");
-DEFINE_double(fix_cost, 5000, "Cost of opening a facility.");
+ABSL_FLAG(int, verbose, 0, "Verbosity level.");
+ABSL_FLAG(int, facilities, 20, "Candidate facilities to consider.");
+ABSL_FLAG(int, clients, 100, "Clients to serve.");
+ABSL_FLAG(double, fix_cost, 5000, "Cost of opening a facility.");
 
 namespace operations_research {
 
 typedef struct {
-  double x { 0 }
-  ;
-  double y { 0 }
-  ;
+  double x{0};
+  double y{0};
 } Location;
 
 typedef struct {
-  int f { -1 }
-  ;
-  int c { -1 }
-  ;
-  MPVariable *x { nullptr }
-  ;
+  int f{-1};
+  int c{-1};
+  MPVariable *x{nullptr};
 } Edge;
 
 static double Distance(const Location &src, const Location &dst) {
@@ -100,8 +95,7 @@ static void UncapacitatedFacilityLocation(
   objective->SetMinimization();
 
   // Add binary facilities variables
-  std::vector<MPVariable *> xf {}
-  ;
+  std::vector<MPVariable *> xf{};
   for (int f = 0; f < facilities; ++f) {
     snprintf(name_buffer, kStrLen, "x[%d](%g,%g)", f, facility[f].x,
              facility[f].y);
@@ -119,10 +113,8 @@ static void UncapacitatedFacilityLocation(
         solver.MakeRowConstraint(/* lb */ 1, /* ub */ infinity, name_buffer);
     for (int f = 0; f < facilities; ++f) {
       double distance = Distance(facility[f], client[c]);
-      if (distance > kMaxDistance)
-        continue;
-      Edge edge {}
-      ;
+      if (distance > kMaxDistance) continue;
+      Edge edge{};
       snprintf(name_buffer, kStrLen, "x[%d,%d]", f, c);
       edge.x = solver.MakeNumVar(/* lb */ 0, /*ub */ 1, name_buffer);
       edge.f = f;
@@ -138,13 +130,12 @@ static void UncapacitatedFacilityLocation(
       edge_constraint->SetCoefficient(edge.x, -1);
       edge_constraint->SetCoefficient(xf[f], 1);
     }
-  } // End adding all edge variables
+  }  // End adding all edge variables
   LOG(INFO) << "Number of variables = " << solver.NumVariables();
   LOG(INFO) << "Number of constraints = " << solver.NumConstraints();
   // display on screen LP if small enough
   if (clients <= 10 && facilities <= 10) {
-    std::string lp_string {}
-    ;
+    std::string lp_string{};
     solver.ExportModelAsLpFormat(/* obfuscate */ false, &lp_string);
     std::cout << "LP-Model:\n" << lp_string << std::endl;
   }
@@ -161,14 +152,12 @@ static void UncapacitatedFacilityLocation(
     if (absl::GetFlag(FLAGS_verbose)) {
       std::vector<std::vector<int> > solution(facilities);
       for (auto &edge : edges) {
-        if (edge.x->solution_value() < 0.5)
-          continue;
+        if (edge.x->solution_value() < 0.5) continue;
         solution[edge.f].push_back(edge.c);
       }
       std::cout << "\tSolution:\n";
       for (int f = 0; f < facilities; ++f) {
-        if (solution[f].size() < 1)
-          continue;
+        if (solution[f].size() < 1) continue;
         assert(xf[f]->solution_value() > 0.5);
         snprintf(name_buffer, kStrLen, "\t  Facility[%d](%g,%g):", f,
                  facility[f].x, facility[f].y);
@@ -217,25 +206,25 @@ void RunAllExamples(int32 facilities, int32 clients, double fix_cost) {
   LOG(INFO) << "---- Integer programming example with Gurobi ----";
   UncapacitatedFacilityLocation(facilities, clients, fix_cost,
                                 MPSolver::GUROBI_MIXED_INTEGER_PROGRAMMING);
-#endif // USE_GUROBI
+#endif  // USE_GUROBI
 #if defined(USE_CPLEX)
   LOG(INFO) << "---- Integer programming example with CPLEX ----";
   UncapacitatedFacilityLocation(facilities, clients, fix_cost,
                                 MPSolver::CPLEX_MIXED_INTEGER_PROGRAMMING);
-#endif // USE_CPLEX
+#endif  // USE_CPLEX
   LOG(INFO) << "---- Integer programming example with CP-SAT ----";
   UncapacitatedFacilityLocation(facilities, clients, fix_cost,
                                 MPSolver::SAT_INTEGER_PROGRAMMING);
 }
 
-} // namespace operations_research
+}  // namespace operations_research
 
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
   gflags::SetUsageMessage(
       std::string("This program solve a (randomly generated)\n") +
       std::string("Uncapacitated Facility Location Problem. Sample Usage:\n"));
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  absl::ParseCommandLine(argc, argv);
   CHECK_LT(0, absl::GetFlag(FLAGS_facilities))
       << "Specify an instance size greater than 0.";
   CHECK_LT(0, absl::GetFlag(FLAGS_clients))

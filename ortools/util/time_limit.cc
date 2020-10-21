@@ -15,12 +15,12 @@
 
 #include "absl/strings/str_cat.h"
 
-DEFINE_bool(time_limit_use_usertime, false,
-            "If true, rely on the user time in the TimeLimit class. This is "
-            "only recommended for benchmarking on a non-isolated environment.");
+ABSL_FLAG(bool, time_limit_use_usertime, false,
+          "If true, rely on the user time in the TimeLimit class. This is "
+          "only recommended for benchmarking on a non-isolated environment.");
 
-DEFINE_bool(time_limit_use_instruction_count, false,
-            "If true, measures the number of instructions executed");
+ABSL_FLAG(bool, ime_limit_use_instruction_count, false,
+          "If true, measures the number of instructions executed");
 
 namespace operations_research {
 
@@ -30,8 +30,9 @@ const int TimeLimit::kHistorySize = 100;
 
 std::string TimeLimit::DebugString() const {
   std::string buffer = absl::StrCat(
-      "Time left: ", (GetTimeLeft()), "\nDeterministic time left: ",
-      (GetDeterministicTimeLeft()), "\nElapsed time: ", (GetElapsedTime()),
+      "Time left: ", (GetTimeLeft()),
+      "\nDeterministic time left: ", (GetDeterministicTimeLeft()),
+      "\nElapsed time: ", (GetElapsedTime()),
       "\nElapsed deterministic time: ", (GetElapsedDeterministicTime()));
 #ifndef NDEBUG
   for (const auto &counter : deterministic_counters_) {
@@ -61,4 +62,4 @@ NestedTimeLimit::~NestedTimeLimit() {
       time_limit_.GetElapsedDeterministicTime());
 }
 
-} // namespace operations_research
+}  // namespace operations_research

@@ -56,19 +56,20 @@ using operations_research::RoutingSearchParameters;
 using operations_research::ServiceTimePlusTransition;
 using operations_research::Solver;
 
-DEFINE_int32(vrp_orders, 100, "Nodes in the problem.");
-DEFINE_int32(vrp_vehicles, 20, "Size of Traveling Salesman Problem instance.");
-DEFINE_bool(vrp_use_deterministic_random_seed, false,
-            "Use deterministic random seeds.");
-DEFINE_string(routing_search_parameters, "",
-              "Text proto RoutingSearchParameters (possibly partial) that will "
-              "override the DefaultRoutingSearchParameters()");
+ABSL_FLAG(int, vrp_orders, 100, "Nodes in the problem.");
+ABSL_FLAG(int, vrp_vehicles, 20,
+          "Size of Traveling Salesman Problem instance.");
+ABSL_FLAG(bool, vrp_use_deterministic_random_seed, false,
+          "Use deterministic random seeds.");
+ABSL_FLAG(std::string, routing_search_parameters, "",
+          "Text proto RoutingSearchParameters (possibly partial) that will "
+          "override the DefaultRoutingSearchParameters()");
 
 const char *kTime = "Time";
 const char *kCapacity = "Capacity";
 
 int main(int argc, char **argv) {
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  absl::ParseCommandLine(argc, argv);
   CHECK_LT(0, absl::GetFlag(FLAGS_vrp_orders))
       << "Specify an instance size greater than 0.";
   CHECK_LT(0, absl::GetFlag(FLAGS_vrp_vehicles))
@@ -98,12 +99,12 @@ int main(int argc, char **argv) {
     locations.AddRandomLocation(kXMax, kYMax);
   }
 
-    // Setting the cost function.
+  // Setting the cost function.
   const int vehicle_cost =
       routing.RegisterTransitCallback([&locations, &manager](int64 i, int64 j) {
-    return locations.ManhattanDistance(manager.IndexToNode(i),
-                                       manager.IndexToNode(j));
-  });
+        return locations.ManhattanDistance(manager.IndexToNode(i),
+                                           manager.IndexToNode(j));
+      });
   routing.SetArcCostEvaluatorOfAllVehicles(vehicle_cost);
 
   // Adding capacity dimension constraints.
@@ -114,26 +115,27 @@ int main(int argc, char **argv) {
   demand.Initialize();
   routing.AddDimension(
       routing.RegisterTransitCallback([&demand, &manager](int64 i, int64 j) {
-    return demand.Demand(manager.IndexToNode(i), manager.IndexToNode(j));
-  }),
-      kNullCapacitySlack, kVehicleCapacity, /*fix_start_cumul_to_zero=*/ true,
+        return demand.Demand(manager.IndexToNode(i), manager.IndexToNode(j));
+      }),
+      kNullCapacitySlack, kVehicleCapacity, /*fix_start_cumul_to_zero=*/true,
       kCapacity);
 
   // Adding time dimension constraints.
   const int64 kTimePerDemandUnit = 300;
   const int64 kHorizon = 24 * 3600;
   ServiceTimePlusTransition time(
-      kTimePerDemandUnit, [&demand](RoutingNodeIndex i, RoutingNodeIndex j) {
-    return demand.Demand(i, j);
-  },
+      kTimePerDemandUnit,
+      [&demand](RoutingNodeIndex i, RoutingNodeIndex j) {
+        return demand.Demand(i, j);
+      },
       [&locations](RoutingNodeIndex i, RoutingNodeIndex j) {
-    return locations.ManhattanTime(i, j);
-  });
+        return locations.ManhattanTime(i, j);
+      });
   routing.AddDimension(
       routing.RegisterTransitCallback([&time, &manager](int64 i, int64 j) {
-    return time.Compute(manager.IndexToNode(i), manager.IndexToNode(j));
-  }),
-      kHorizon, kHorizon, /*fix_start_cumul_to_zero=*/ false, kTime);
+        return time.Compute(manager.IndexToNode(i), manager.IndexToNode(j));
+      }),
+      kHorizon, kHorizon, /*fix_start_cumul_to_zero=*/false, kTime);
   RoutingDimension *const time_dimension = routing.GetMutableDimension(kTime);
 
   // Adding time windows.
@@ -172,10 +174,9 @@ int main(int argc, char **argv) {
     }
   }
   const std::vector<std::vector<int> > break_data = {
-    { /*start_min*/ 11, /*start_max*/ 13, /*duration*/ 2400 },
-    { /*start_min*/ 10, /*start_max*/ 15, /*duration*/ 1800 },
-    { /*start_min*/ 10, /*start_max*/ 15, /*duration*/ 1800 }
-  };
+      {/*start_min*/ 11, /*start_max*/ 13, /*duration*/ 2400},
+      {/*start_min*/ 10, /*start_max*/ 15, /*duration*/ 1800},
+      {/*start_min*/ 10, /*start_max*/ 15, /*duration*/ 1800}};
   Solver *const solver = routing.solver();
   for (int vehicle = 0; vehicle < absl::GetFlag(FLAGS_vrp_vehicles);
        ++vehicle) {
