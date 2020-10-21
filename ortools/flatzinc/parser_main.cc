@@ -74,10 +74,10 @@ int main(int argc, char **argv) {
   const char kUsage[] =
       "Parses a flatzinc .fzn file, optionally presolve it, and prints it in "
       "human-readable format";
-  absl::SetFlag(&absl::GetFlag(FLAGS_log_prefix), false);
-  absl::SetFlag(&absl::GetFlag(FLAGS_logtostderr), true);
-  gflags::SetUsageMessage(kUsage);
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  absl::SetFlag(&FLAGS_log_prefix, false);
+  absl::SetFlag(&FLAGS_logtostderr, true);
+  absl::SetProgramUsageMessage(kUsage);
+  absl::ParseCommandLine(*argc, *argv);
   google::InitGoogleLogging(argv[0]);
   operations_research::fz::ParseFile(absl::GetFlag(FLAGS_file),
                                      absl::GetFlag(FLAGS_presolve));

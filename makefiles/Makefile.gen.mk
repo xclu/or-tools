@@ -50,6 +50,7 @@ BASE_DEPS = \
 
 BASE_LIB_OBJS = \
  $(OBJ_DIR)/base/bitmap.$O \
+ $(OBJ_DIR)/base/commandlineflags.$O \
  $(OBJ_DIR)/base/file.$O \
  $(OBJ_DIR)/base/logging.$O \
  $(OBJ_DIR)/base/logging_port.$O \
@@ -69,6 +70,9 @@ objs/base/bitmap.$O: ortools/base/bitmap.cc ortools/base/bitmap.h \
  ortools/base/log_severity.h ortools/base/macros.h \
  ortools/base/vlog_is_on.h | $(OBJ_DIR)/base
 	$(CCC) $(CFLAGS) -c $(SRC_DIR)$Sortools$Sbase$Sbitmap.cc $(OBJ_OUT)$(OBJ_DIR)$Sbase$Sbitmap.$O
+
+objs/base/commandlineflags.$O: ortools/base/commandlineflags.h | $(OBJ_DIR)/base
+	$(CCC) $(CFLAGS) -c $(SRC_DIR)$Sortools$Sbase$Scommandlineflags.cc $(OBJ_OUT)$(OBJ_DIR)$Sbase$Scommandlineflags.$O
 
 objs/base/file.$O: ortools/base/file.cc ortools/base/file.h \
  ortools/base/integral_types.h ortools/base/logging.h \
@@ -4787,4 +4791,3 @@ $(GEN_DIR)/ortools/gscip/gscip.pb.h: \
 $(OBJ_DIR)/gscip/gscip.pb.$O: \
  $(GEN_DIR)/ortools/gscip/gscip.pb.cc | $(OBJ_DIR)/gscip
 	$(CCC) $(CFLAGS) -c $(GEN_PATH)$Sortools$Sgscip$Sgscip.pb.cc $(OBJ_OUT)$(OBJ_DIR)$Sgscip$Sgscip.pb.$O
-
