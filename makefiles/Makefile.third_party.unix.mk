@@ -208,7 +208,7 @@ Makefile.local: makefiles/Makefile.third_party.$(SYSTEM).mk
 .PHONY: install_protobuf
 install_protobuf: dependencies/install/lib/libprotobuf.a
 
-dependencies/install/lib/libprotobuf.a: dependencies/install/lib/libglog.a dependencies/sources/protobuf-$(PROTOBUF_TAG) | dependencies/install
+dependencies/install/lib/libprotobuf.a: dependencies/sources/protobuf-$(PROTOBUF_TAG) | dependencies/install
 	cd dependencies/sources/protobuf-$(PROTOBUF_TAG) && \
   $(SET_COMPILER) $(CMAKE) -Hcmake -Bbuild_cmake \
     -DCMAKE_PREFIX_PATH="$(OR_TOOLS_TOP)/dependencies/install" \
