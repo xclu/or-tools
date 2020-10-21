@@ -17,5 +17,6 @@
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
+#include "absl/flags/usage.h"
 
 #endif  // OR_TOOLS_BASE_COMMANDLINEFLAGS_H_

@@ -68,11 +68,7 @@ void FixFlagsAndEnvironmentForSwig() {
 
 #include "ortools/base/logging.h"
 #include "ortools/base/raw_logging.h"
-// #include "ortools/base/googleinit.h"
-
-#ifdef HAVE_STACKTRACE
-#include "stacktrace.h"
-#endif
+#include "absl/debugging/stacktrace.h"
 
 using std::dec;
 using std::hex;
@@ -1388,7 +1384,7 @@ void LogMessage::RecordCrashReason(
                     fatal_msg_data_exclusive.num_prefix_chars_;
 #ifdef HAVE_STACKTRACE
   // Retrieve the stack trace, omitting the logging frames that got us here.
-  reason->depth = GetStackTrace(reason->stack, ARRAYSIZE(reason->stack), 4);
+  reason->depth = absl::GetStackTrace(reason->stack, ARRAYSIZE(reason->stack), 4);
 #else
   reason->depth = 0;
 #endif

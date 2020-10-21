@@ -65,11 +65,10 @@ static pthread_t g_main_thread_id;
 }  // namespace google
 
 // The following APIs are all internal.
-#ifdef HAVE_STACKTRACE
-
 #include "ortools/base/commandlineflags.h"
-#include "ortools/base/stacktrace.h"
-#include "ortools/base/symbolize.h"
+#include "absl/debugging/stacktrace.h"
+#include "absl/debugging/symbolize.h"
+#include "absl/debugging/failure_signal_handler.h"
 
 ABSL_FLAG(bool, symbolize_stacktrace, true,
           "Symbolize the stack trace in the tombstone");
@@ -93,7 +92,6 @@ static void DebugWriteToString(const char* data, void* arg) {
   reinterpret_cast<string*>(arg)->append(data);
 }
 
-#ifdef HAVE_SYMBOLIZE
 // Print a program counter and its symbol name.
 static void DumpPCAndSymbol(DebugWriter* writerfn, void* arg, void* pc,
                             const char* const prefix) {
@@ -102,7 +100,7 @@ static void DumpPCAndSymbol(DebugWriter* writerfn, void* arg, void* pc,
   // Symbolizes the previous address of pc because pc may be in the
   // next function.  The overrun happens when the function ends with
   // a call to a function annotated noreturn (e.g. CHECK).
-  if (Symbolize(reinterpret_cast<char*>(pc) - 1, tmp, sizeof(tmp))) {
+  if (absl::Symbolize(reinterpret_cast<char*>(pc) - 1, tmp, sizeof(tmp))) {
     symbol = tmp;
   }
   char buf[1024];
@@ -110,7 +108,6 @@ static void DumpPCAndSymbol(DebugWriter* writerfn, void* arg, void* pc,
            pc, symbol);
   writerfn(buf, arg);
 }
-#endif
 
 static void DumpPC(DebugWriter* writerfn, void* arg, void* pc,
                    const char* const prefix) {
@@ -123,46 +120,20 @@ static void DumpPC(DebugWriter* writerfn, void* arg, void* pc,
 static void DumpStackTrace(int skip_count, DebugWriter* writerfn, void* arg) {
   // Print stack trace
   void* stack[32];
-  int depth = GetStackTrace(stack, ARRAYSIZE(stack), skip_count + 1);
+  int depth = absl::GetStackTrace(stack, ARRAYSIZE(stack), skip_count + 1);
   for (int i = 0; i < depth; i++) {
-#if defined(HAVE_SYMBOLIZE)
     if (absl::GetFlag(FLAGS_symbolize_stacktrace)) {
       DumpPCAndSymbol(writerfn, arg, stack[i], "    ");
     } else {
       DumpPC(writerfn, arg, stack[i], "    ");
     }
-#else
-    DumpPC(writerfn, arg, stack[i], "    ");
-#endif
   }
 }
 
 static void DumpStackTraceAndExit() {
   DumpStackTrace(1, DebugWriteToStderr, NULL);
-
-  // TOOD(hamaji): Use signal instead of sigaction?
-  if (IsFailureSignalHandlerInstalled()) {
-    // Set the default signal handler for SIGABRT, to avoid invoking our
-    // own signal handler installed by InstallFailureSignalHandler().
-#ifdef HAVE_SIGACTION
-    struct sigaction sig_action;
-    memset(&sig_action, 0, sizeof(sig_action));
-    sigemptyset(&sig_action.sa_mask);
-    sig_action.sa_handler = SIG_DFL;
-    sigaction(SIGABRT, &sig_action, NULL);
-#elif defined(OS_WINDOWS)
-    signal(SIGABRT, SIG_DFL);
-#endif  // HAVE_SIGACTION
-  }
-
   abort();
 }
-
-}  // namespace google
-
-#endif  // HAVE_STACKTRACE
-
-namespace google {
 
 namespace glog_internal_namespace_ {
 
@@ -170,7 +141,7 @@ const char* ProgramInvocationShortName() {
   if (g_program_invocation_short_name != NULL) {
     return g_program_invocation_short_name;
   } else {
-    // TODO(hamaji): Use /proc/self/cmdline and so?
+    // TODO(user): Use /proc/self/cmdline and so?
     return "UNKNOWN";
   }
 }
@@ -331,11 +302,9 @@ class GoogleInitializer {
 
 REGISTER_MODULE_INITIALIZER(logging_utilities, MyUserNameInitializer());
 
-#ifdef HAVE_STACKTRACE
 void DumpStackTraceToString(string* stacktrace) {
   DumpStackTrace(1, DebugWriteToString, stacktrace);
 }
-#endif
 
 // We use an atomic operation to prevent problems with calling CrashReason
 // from inside the Mutex implementation (potentially through RAW_CHECK).
@@ -356,9 +325,7 @@ void InitGoogleLoggingUtilities(const char* argv0) {
   g_program_invocation_short_name = slash ? slash + 1 : argv0;
   g_main_thread_id = pthread_self();
 
-#ifdef HAVE_STACKTRACE
   InstallFailureFunction(&DumpStackTraceAndExit);
-#endif
 }
 
 void ShutdownGoogleLoggingUtilities() {
@@ -374,16 +341,3 @@ void ShutdownGoogleLoggingUtilities() {
 }  // namespace glog_internal_namespace_
 
 }  // namespace google
-
-// Make an implementation of stacktrace compiled.
-#ifdef STACKTRACE_H
-#include STACKTRACE_H
-#if 0
-// For include scanners which can't handle macro expansions.
-#include "stacktrace_generic-inl.h"
-#include "stacktrace_libunwind-inl.h"
-#include "stacktrace_powerpc-inl.h"
-#include "stacktrace_x86-inl.h"
-#include "stacktrace_x86_64-inl.h"
-#endif
-#endif

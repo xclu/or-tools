@@ -445,8 +445,7 @@ int main(int argc, char **argv) {
   // By default, we want to show how the solver progress. Note that this needs
   // to be set before InitGoogle() which has the nice side-effect of allowing
   // the user to override it.
-  //  absl::SetFlag(&FLAGS_vmodule, "*cp_model*=1");
-  gflags::SetUsageMessage(kUsage);
+  absl::SetProgramUsageMessage(kUsage);
   absl::ParseCommandLine(argc, argv);
   google::InitGoogleLogging(argv[0]);
   absl::SetFlag(&FLAGS_alsologtostderr, true);

@@ -41,14 +41,12 @@
 #include <fcntl.h>  // for open()
 #include <time.h>
 
+#include "absl/debugging/stacktrace.h"
 #include "ortools/base/commandlineflags.h"
 #include "ortools/base/logging.h"  // To pick up flag settings etc.
 #include "ortools/base/logging_config.h"
 #include "ortools/base/logging_utilities.h"
 
-#ifdef HAVE_STACKTRACE
-#include "stacktrace.h"
-#endif
 
 #if defined(HAVE_SYSCALL_H)
 #include <syscall.h>  // for syscall()
@@ -144,12 +142,8 @@ void RawLog__(LogSeverity severity, const char* file, int line,
       crash_reason.line_number = line;
       memcpy(crash_buf, msg_start, msg_size);  // Don't include prefix
       crash_reason.message = crash_buf;
-#ifdef HAVE_STACKTRACE
       crash_reason.depth =
-          GetStackTrace(crash_reason.stack, ARRAYSIZE(crash_reason.stack), 1);
-#else
-      crash_reason.depth = 0;
-#endif
+          absl::GetStackTrace(crash_reason.stack, ARRAYSIZE(crash_reason.stack), 1);
       SetCrashReason(&crash_reason);
     }
     LogMessage::Fail();  // abort()

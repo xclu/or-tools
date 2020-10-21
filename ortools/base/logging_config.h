@@ -97,9 +97,6 @@
 /* define if your compiler has __sync_val_compare_and_swap */
 #define HAVE___SYNC_VAL_COMPARE_AND_SWAP
 
-/* define if symbolize support is available */
-#define HAVE_SYMBOLIZE
-
 /* define if localtime_r is available in time.h */
 #define HAVE_LOCALTIME_R
 

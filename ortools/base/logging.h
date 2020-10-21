@@ -843,10 +843,6 @@ namespace glog_internal_namespace_ {
 template <bool>
 struct CompileAssert {};
 struct CrashReason;
-
-// Returns true if FailureSignalHandler is installed.
-// Needs to be exported since it's used by the signalhandler_unittest.
-GOOGLE_GLOG_DLL_DECL bool IsFailureSignalHandlerInstalled();
 }  // namespace glog_internal_namespace_
 
 #define LOG_EVERY_N(severity, n) \
@@ -1512,32 +1508,6 @@ class GOOGLE_GLOG_DLL_DECL NullStreamFatal : public NullStream {
       : NullStream(file, line, result) {}
   __attribute__((noreturn)) ~NullStreamFatal() throw() { _exit(1); }
 };
-
-// Install a signal handler that will dump signal information and a stack
-// trace when the program crashes on certain signals.  We'll install the
-// signal handler for the following signals.
-//
-// SIGSEGV, SIGILL, SIGFPE, SIGABRT, SIGBUS, and SIGTERM.
-//
-// By default, the signal handler will write the failure dump to the
-// standard error.  You can customize the destination by installing your
-// own writer function by InstallFailureWriter() below.
-//
-// Note on threading:
-//
-// The function should be called before threads are created, if you want
-// to use the failure signal handler for all threads.  The stack trace
-// will be shown only for the thread that receives the signal.  In other
-// words, stack traces of other threads won't be shown.
-GOOGLE_GLOG_DLL_DECL void InstallFailureSignalHandler();
-
-// Installs a function that is used for writing the failure dump.  "data"
-// is the pointer to the beginning of a message to be written, and "size"
-// is the size of the message.  You should not expect the data is
-// terminated with '\0'.
-GOOGLE_GLOG_DLL_DECL void InstallFailureWriter(void (*writer)(const char* data,
-                                                              int size));
-
 }  // namespace google
 
 #endif  // ORTOOLS_BASE_LOGGING_H_

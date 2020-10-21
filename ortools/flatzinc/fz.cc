@@ -59,7 +59,7 @@ using operations_research::ThreadPool;
 namespace operations_research {
 namespace fz {
 
-void FixAndParseParameters(int *argc, char ***argv) {
+std::vector<char*> FixAndParseParameters(int *argc, char ***argv) {
   absl::SetFlag(&FLAGS_log_prefix, false);
 
   char all_param[] = "--all_solutions";
@@ -108,17 +108,18 @@ void FixAndParseParameters(int *argc, char ***argv) {
   }
   const char kUsage[] =
       "Usage: see flags.\nThis program parses and solve a flatzinc problem.";
-  // gflags::SetUsageMessage(kUsage);
-  absl::ParseCommandLine(*argc, *argv);
+  absl::SetProgramUsageMessage(kUsage);
+  const std::vector<char*> residual_flags = absl::ParseCommandLine(*argc, *argv);
   google::InitGoogleLogging((*argv)[0]);
 
   // Fix time limit if -t was used.
   if (use_time_param) {
     absl::SetFlag(&FLAGS_time_limit, absl::GetFlag(FLAGS_time_limit) / 1000.0);
   }
+  return residual_flags;
 }
 
-Model ParseFlatzincModel(const std::string &input, bool input_is_filename) {
+Model ParseFlatzincModel(const std::string& input, bool input_is_filename) {
   WallTimer timer;
   timer.Start();
   // Read model.
@@ -163,7 +164,8 @@ Model ParseFlatzincModel(const std::string &input, bool input_is_filename) {
 int main(int argc, char **argv) {
   // Flatzinc specifications require single dash parameters (-a, -f, -p).
   // We need to fix parameters before parsing them.
-  operations_research::fz::FixAndParseParameters(&argc, &argv);
+  const std::vector<char *> residual_flags =
+      operations_research::fz::FixAndParseParameters(&argc, &argv);
   // We allow piping model through stdin.
   std::string input;
   if (absl::GetFlag(FLAGS_read_from_stdin)) {
@@ -172,11 +174,11 @@ int main(int argc, char **argv) {
       input.append(currentLine);
     }
   } else {
-    if (argc <= 1) {
+    if (residual_flags.empty()) {
       LOG(ERROR) << "Usage: " << argv[0] << " <file>";
       return EXIT_FAILURE;
     }
-    input = argv[1];
+    input = residual_flags.back();
   }
 
   operations_research::fz::Model model =

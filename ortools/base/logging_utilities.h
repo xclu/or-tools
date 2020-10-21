@@ -105,39 +105,6 @@
 // correctly when GetStackTrace() is called with max_depth == 0.
 // Some code may do that.
 
-#if defined(HAVE_LIB_UNWIND)
-#define STACKTRACE_H "stacktrace_libunwind-inl.h"
-#elif !defined(NO_FRAME_POINTER)
-#if defined(__x86_64__) && __GNUC__ >= 2 && HAVE_UNWIND_H
-#define STACKTRACE_H "stacktrace_x86_64-inl.h"
-#elif (defined(__ppc__) || defined(__PPC__)) && __GNUC__ >= 2
-#define STACKTRACE_H "stacktrace_powerpc-inl.h"
-#elif defined(OS_WINDOWS)
-#define STACKTRACE_H "stacktrace_windows-inl.h"
-#endif
-#endif
-
-#if !defined(STACKTRACE_H) && defined(HAVE_EXECINFO_H)
-#define STACKTRACE_H "stacktrace_generic-inl.h"
-#endif
-
-#if defined(STACKTRACE_H)
-#define HAVE_STACKTRACE
-#endif
-
-#ifndef HAVE_SYMBOLIZE
-// defined by gcc
-#if defined(__ELF__) && defined(OS_LINUX)
-#define HAVE_SYMBOLIZE
-#elif defined(OS_MACOSX) && defined(HAVE_DLADDR)
-// Use dladdr to symbolize.
-#define HAVE_SYMBOLIZE
-#elif defined(OS_WINDOWS)
-// Use DbgHelp to symbolize
-#define HAVE_SYMBOLIZE
-#endif
-#endif  // !defined(HAVE_SYMBOLIZE)
-
 #ifndef ARRAYSIZE
 // There is a better way, but this is good enough for our purpose.
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
