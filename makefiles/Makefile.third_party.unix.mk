@@ -364,6 +364,18 @@ $(_ABSL_STATIC_LIB_DIR)libabsl_cord.a \
 $(_ABSL_STATIC_LIB_DIR)libabsl_int128.a \
 $(_ABSL_STATIC_LIB_DIR)libabsl_debugging_internal.a \
 $(_ABSL_STATIC_LIB_DIR)libabsl_demangle_internal.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_commandlineflag.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_commandlineflag_internal.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_config.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_internal.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_marshalling.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_parse.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_private_handle_accessor.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_program_name.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_reflection.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_usage.a \
+$(_ABSL_STATIC_LIB_DIR)libabsl_flags_usage_internal.a \
 $(_ABSL_STATIC_LIB_DIR)libabsl_base.a \
 
 ABSL_LNK = $(STATIC_ABSL_LNK)
