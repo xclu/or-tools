@@ -643,6 +643,8 @@ endif
 $(SCIP_SRCDIR): | dependencies/sources
 	-$(DELREC) $(SCIP_SRCDIR)
 	tar xvzf dependencies/archives/scip-$(SCIP_TAG).tgz -C dependencies/sources
+	cd dependencies/sources/scip-$(SCIP_TAG) && git apply --ignore-whitespace ../../../patches/scip-$(SCIP_TAG).patch
+
 
 $(GEN_DIR)/ortools/linear_solver/lpi_glop.cc: $(SCIP_SRCDIR) | $(GEN_DIR)/ortools/linear_solver
 	$(COPY) dependencies/sources/scip-$(SCIP_TAG)/src/lpi/lpi_glop.cpp $(GEN_DIR)/ortools/linear_solver/lpi_glop.cc
